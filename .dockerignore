@@ -1,0 +1,16 @@
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+target/
+*.log
+logs/
+.DS_Store
+Thumbs.db
+Dockerfile
+docker-compose*.yml
+*.md
+docs/
+*.tmp
+*.bak
