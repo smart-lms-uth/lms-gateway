@@ -37,7 +37,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/v1/auth/register",
             "/oauth2/",
             "/login/oauth2/",
-            "/actuator/"
+            "/actuator/",
+            "/api/semesters",
+            "/api/subjects",
+            "/api/courses",
+            "/api/categories",
+            "/api/reviews/course/"
     );
 
     @PostConstruct
@@ -69,9 +74,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             Claims claims = validateToken(token);
             
             // Add user info to request headers for downstream services
+            // userId is stored as a separate claim, not in subject
+            Object userIdClaim = claims.get("userId");
+            String userId = userIdClaim != null ? userIdClaim.toString() : claims.getSubject();
+            
             ServerHttpRequest modifiedRequest = request.mutate()
-                    .header("X-User-Id", claims.getSubject())
+                    .header("X-User-Id", userId)
                     .header("X-User-Name", claims.getSubject())
+                    .header("X-User-Role", claims.get("role", String.class))
                     .build();
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
