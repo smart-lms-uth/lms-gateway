@@ -1,4 +1,4 @@
-# Multi-stage build for Gateway
+# Multi-stage build for Gateway - Optimized for caching
 
 # Stage 1: Build
 FROM eclipse-temurin:21-jdk-alpine AS builder
@@ -7,9 +7,16 @@ COPY .mvn ./.mvn
 COPY mvnw .
 COPY pom.xml .
 RUN chmod +x ./mvnw
-RUN ./mvnw dependency:go-offline -B
+
+# Download dependencies with cache mount
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw dependency:go-offline -B
+
 COPY src ./src
-RUN ./mvnw clean package -DskipTests -B
+
+# Build with cache mount
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw clean package -DskipTests -B
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
