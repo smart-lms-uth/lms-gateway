@@ -33,8 +33,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Paths that don't require authentication
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",
+            "/api/v1/auth/",
             "/oauth2/",
             "/login/oauth2/",
             "/actuator/",
@@ -42,7 +41,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/subjects",
             "/api/courses",
             "/api/categories",
-            "/api/reviews/course/"
+            "/api/reviews/course/",
+            "/api/v1/ai/",
+            "/api/v1/activities/batch",  // Allow activity tracking without auth (userId comes from token if available)
+            "/api/v1/activities"  // Single activity logging
     );
 
     @PostConstruct
@@ -55,6 +57,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
+        String method = request.getMethod().name();
+
+        // Skip CORS preflight requests
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return chain.filter(exchange);
+        }
 
         // Skip authentication for public paths
         if (isPublicPath(path)) {
