@@ -44,7 +44,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/reviews/course/",
             "/api/v1/ai/",
             "/api/v1/activities/batch",  // Allow activity tracking without auth (userId comes from token if available)
-            "/api/v1/activities"  // Single activity logging
+            "/api/v1/activities",  // Single activity logging
+            "/api/files/"  // Public file access for downloads
     );
 
     @PostConstruct
